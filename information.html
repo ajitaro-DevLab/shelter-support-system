@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#123f3c">
+  <title>避難所インフォメーション</title>
+  <link rel="stylesheet" href="css/information.css?v=3">
+</head>
+<body>
+  <main class="information-board" aria-live="polite">
+    <header class="board-header">
+      <div>
+        <p class="board-label">避難所インフォメーション</p>
+        <h1 id="facility-name">読み込み中...</h1>
+      </div>
+      <div class="board-clock">
+        <time id="current-time">--:--</time>
+        <time id="current-date">----年--月--日</time>
+      </div>
+    </header>
+
+    <p id="information-context-guidance" class="information-context-guidance" role="alert" hidden>
+      <span id="information-context-message">対象避難所を設定してください。</span>
+      <a href="launcher.html">Launcherで設定する</a>
+    </p>
+
+    <section id="important-notice" class="important-notice" aria-labelledby="important-title">
+      <p id="important-title">重要なお知らせ</p>
+      <strong id="important-message">情報を読み込んでいます</strong>
+    </section>
+
+    <section class="schedule-section" aria-labelledby="schedule-title">
+      <div class="section-title-row">
+        <div>
+          <p class="section-kicker">TODAY</p>
+          <h2 id="schedule-title">本日のお知らせ</h2>
+        </div>
+        <p class="updated-time">情報更新 <time id="data-updated">--:--</time></p>
+      </div>
+
+      <div id="published-notices" class="published-notices"><p class="empty-notice">現在、公開中のお知らせはありません</p></div>
+    </section>
+
+    <footer class="board-footer">
+      <p>この画面は自動更新されます</p>
+      <p id="load-status" role="status">最新情報を確認しています</p>
+    </footer>
+  </main>
+  <script src="js/api-client.js?v=1"></script>
+  <script src="js/demo-context.js?v=1"></script>
+  <script src="js/information.js?v=4"></script>
+</body>
+</html>

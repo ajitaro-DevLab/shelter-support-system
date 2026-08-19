@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f7f5ef">
+  <title>避難所業務支援</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIINfQ3ynh9PpYJbBMY=" crossorigin="">
+  <link rel="stylesheet" href="css/style.css?v=8">
+</head>
+<body>
+  <header class="site-header">
+    <div class="facility-heading">
+      <div>
+        <p class="eyebrow">担当施設</p>
+        <h1 id="shelter-name">未設定</h1>
+        <p class="facility-user">端末利用者 <strong id="home-context-user">未設定</strong></p>
+      </div>
+      <button class="header-send-button" type="button" data-action-label="本部へ送信">送信</button>
+    </div>
+    <div class="header-time" aria-live="polite">
+      <time id="current-time">--:--</time>
+      <span id="current-date">----年--月--日</span>
+    </div>
+  </header>
+
+  <nav class="view-tabs" aria-label="画面切り替え">
+    <button class="view-tab is-active" type="button" data-view="home" aria-pressed="true">⌂ ホーム</button>
+    <button class="view-tab" type="button" data-view="map" aria-pressed="false">⌖ 避難所地図</button>
+  </nav>
+
+  <main>
+    <div id="home-context-guidance" class="error-message home-context-guidance" role="alert" hidden>
+      <span id="home-context-message">対象避難所と利用者を設定してください。</span>
+      <a href="launcher.html">Launcherで設定する</a>
+    </div>
+    <section id="home-view" class="view is-active" aria-labelledby="home-title">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">いま起きたことを選ぶ</p>
+          <h2 id="home-title">避難所ホーム</h2>
+        </div>
+        <div class="unsent-count"><span>未送信</span><strong>3件</strong></div>
+      </div>
+
+      <section class="shelter-status" aria-labelledby="status-title">
+        <div class="status-summary">
+          <div>
+            <p class="status-caption" id="status-title">避難所ステータス</p>
+            <p class="evacuee-count"><span>避難者</span><strong id="home-evacuees">--名</strong></p>
+            <p class="status-meta-line">最終更新者 <strong id="home-last-updater">未確認</strong></p>
+            <p class="status-meta-line">最終更新 <strong id="home-updated-at">未確認</strong></p>
+          </div>
+          <div class="official-confirmation">
+            <span>正式確認人数</span><strong id="home-confirmed-count">未確認</strong>
+            <span>最終正式確認</span><strong id="home-confirmed-at">未確認</strong>
+            <span>確認枠</span><strong id="home-confirmation-slot">未確認</strong>
+          </div>
+        </div>
+        <div class="status-items" aria-label="物資と医療の状態">
+          <button class="status-item" type="button" data-status-key="water"><span>水</span><i class="status-dot status-green" aria-hidden="true"></i><small>安定</small></button>
+          <button class="status-item" type="button" data-status-key="food"><span>食料</span><i class="status-dot status-green" aria-hidden="true"></i><small>安定</small></button>
+          <button class="status-item" type="button" data-status-key="hygiene"><span>衛生</span><i class="status-dot status-yellow" aria-hidden="true"></i><small>注意</small></button>
+          <button class="status-item" type="button" data-status-key="medical"><span>医療</span><i class="status-dot status-green" aria-hidden="true"></i><small>安定</small></button>
+        </div>
+        <div class="operational-summary" aria-label="最新の業務情報">
+          <p><span>最新物資受領</span><strong id="home-latest-supply">記録なし</strong></p>
+          <p><span>避難所不具合</span><strong id="home-latest-issue">記録なし</strong></p>
+          <p><span>状態</span><strong id="home-status">未確認</strong></p>
+          <p><span>信頼度</span><strong id="home-confidence">未確認</strong></p>
+        </div>
+        <div class="home-history-summary">
+          <span>直近3件の履歴</span>
+          <ul id="home-history"><li>記録なし</li></ul>
+        </div>
+      </section>
+
+      <p id="home-load-status" class="error-message" role="alert" hidden></p>
+
+      <div class="event-grid" aria-label="出来事メニュー">
+        <button class="event-button event-people" type="button" data-home-event="visitor"><span class="event-icon" aria-hidden="true">人</span><span>人が来た</span></button>
+        <button class="event-button event-supplies" type="button" data-home-event="supply"><span class="event-icon" aria-hidden="true">箱</span><span>物が来た</span></button>
+        <button class="event-button event-trouble" type="button" data-home-event="issue"><span class="event-icon" aria-hidden="true">!</span><span>困りごとが出た</span></button>
+        <button class="event-button event-change" type="button" data-home-event="confirmation"><span class="event-icon" aria-hidden="true">✓</span><span>定時確認</span></button>
+      </div>
+
+      <p id="prototype-message" class="prototype-message" role="status" hidden></p>
+
+      <div class="home-lower-grid">
+        <article class="notice-card">
+          <div class="card-title-row"><h3>今日のお知らせ</h3><span>8月7日</span></div>
+          <ul>
+            <li><time>14:30</time><span>給水車 到着予定</span></li>
+            <li><time>16:00</time><span>本部へ定時報告</span></li>
+          </ul>
+          <button class="notice-detail-button" type="button" data-action-label="お知らせの詳細を見る">詳細を見る</button>
+        </article>
+        <button class="paper-button" type="button" data-action-label="紙様式を見る"><span aria-hidden="true">▤</span><span><strong>紙様式を見る</strong><small>印刷用の様式を確認</small></span><span aria-hidden="true">›</span></button>
+      </div>
+    </section>
+
+    <section id="map-view" class="view" aria-labelledby="map-title" hidden>
+      <div class="section-heading map-heading">
+        <div><p class="eyebrow">5か所の状況</p><h2 id="map-title">避難所地図</h2></div>
+        <div class="legend" aria-label="状態の凡例">
+          <span><i class="status-dot status-green"></i>安定</span><span><i class="status-dot status-yellow"></i>注意</span><span><i class="status-dot status-red"></i>要対応</span><span><i class="status-dot status-gray"></i>未確認</span>
+        </div>
+      </div>
+      <div id="map" aria-label="避難所5か所を表示する地図"></div>
+      <p class="map-help">マーカーを押すと、避難者数・主要物資・更新時刻・信頼度を確認できます。</p>
+      <p id="map-error" class="error-message" role="alert" hidden></p>
+    </section>
+  </main>
+
+  <div id="status-dialog" class="status-dialog" role="dialog" aria-modal="true" aria-labelledby="status-dialog-title" hidden>
+    <div class="status-dialog-panel">
+      <div class="dialog-heading">
+        <div><p class="eyebrow">現在の状況</p><h2 id="status-dialog-title">水</h2></div>
+        <button class="dialog-close" type="button" aria-label="閉じる">×</button>
+      </div>
+      <dl class="status-detail-list">
+        <div><dt>供給率</dt><dd id="detail-rate">82%</dd></div>
+        <div><dt>現在庫</dt><dd id="detail-stock">飲料水 410L</dd></div>
+        <div><dt>更新時刻</dt><dd id="detail-updated">11:35</dd></div>
+        <div><dt>信頼度</dt><dd id="detail-confidence">確定</dd></div>
+      </dl>
+    </div>
+  </div>
+
+  <div id="home-event-dialog" class="status-dialog" role="dialog" aria-modal="true" aria-labelledby="home-event-title" hidden>
+    <div class="status-dialog-panel home-event-panel">
+      <div class="dialog-heading">
+        <div><p class="eyebrow">出来事を記録</p><h2 id="home-event-title">入力</h2></div>
+        <button id="home-event-close" class="dialog-close" type="button" aria-label="閉じる">×</button>
+      </div>
+      <div class="home-event-body">
+        <p class="home-event-current">対象避難所 <strong id="home-event-shelter-name">未設定</strong></p>
+        <p class="home-event-current">現在避難者数 <strong id="home-event-current-count">--名</strong></p>
+
+        <section data-home-event-form="visitor" hidden>
+          <p class="home-event-label">人数増減</p>
+          <div class="home-event-choice-grid">
+            <button type="button" data-visitor-delta="1">＋1</button><button type="button" data-visitor-delta="5">＋5</button><button type="button" data-visitor-delta="10">＋10</button>
+            <button type="button" data-visitor-delta="-1">－1</button><button type="button" data-visitor-delta="-5">－5</button><button type="button" data-visitor-delta="-10">－10</button>
+          </div>
+          <label>人数を直接入力<input id="home-visitor-direct" type="number" step="1" inputmode="numeric" placeholder="例：3 または -3"></label>
+        </section>
+
+        <section data-home-event-form="supply" hidden>
+          <label>物資種別<select id="home-supply-type"><option value="">選択してください</option><option value="water">飲料水</option><option value="food">食料</option><option value="blanket">毛布</option><option value="hygiene">衛生用品</option><option value="portable_toilet">簡易トイレ</option></select></label>
+          <label>数量<input id="home-supply-quantity" type="number" min="1" step="1" inputmode="numeric"></label>
+          <label>単位<select id="home-supply-unit"><option value="">選択してください</option><option>ケース</option><option>箱</option><option>袋</option><option>個</option><option>枚</option><option>セット</option><option>台</option></select></label>
+        </section>
+
+        <section data-home-event-form="issue" hidden>
+          <label>カテゴリ<select id="home-issue-category"><option value="">選択してください</option><option value="toilet">トイレ</option><option value="hygiene">ごみ・衛生</option><option value="power">停電</option><option value="water">断水</option><option value="air_conditioning">空調</option><option value="building">建物</option><option value="other">その他</option></select></label>
+          <label>状態<select id="home-issue-severity"><option value="">選択してください</option><option value="normal">問題なし</option><option value="caution">注意</option><option value="urgent">至急対応</option></select></label>
+        </section>
+
+        <section data-home-event-form="confirmation" hidden>
+          <p class="home-event-slot">今回の確認枠 <strong id="home-event-confirmation-slot">--:--</strong></p>
+          <button id="home-confirmation-unchanged" class="home-event-wide-choice" type="button">変更なし</button>
+          <p class="home-event-label">増減</p>
+          <div class="home-event-choice-grid">
+            <button type="button" data-confirmation-delta="1">＋1</button><button type="button" data-confirmation-delta="5">＋5</button><button type="button" data-confirmation-delta="10">＋10</button>
+            <button type="button" data-confirmation-delta="-1">－1</button><button type="button" data-confirmation-delta="-5">－5</button><button type="button" data-confirmation-delta="-10">－10</button>
+          </div>
+          <label>現在人数を直接訂正<input id="home-confirmation-direct" type="number" min="0" step="1" inputmode="numeric"></label>
+        </section>
+
+        <p>更新後 <strong id="home-event-next-count">--</strong></p>
+        <p id="home-event-validation" class="home-event-validation" role="alert"></p>
+        <p class="home-event-updater">最終更新者 <strong id="home-event-updater">未設定</strong></p>
+      </div>
+      <div class="home-event-actions">
+        <button id="home-event-cancel" type="button">キャンセル</button>
+        <button id="home-event-submit" class="home-event-submit" type="button">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="js/api-client.js?v=1"></script>
+  <script src="js/demo-context.js?v=1"></script>
+  <script src="js/ui.js?v=7"></script>
+  <script src="js/map.js?v=2"></script>
+  <script src="js/confirmation-schedule.js?v=1"></script>
+  <script src="js/home-events.js?v=3"></script>
+  <script src="js/main.js?v=8"></script>
+</body>
+</html>

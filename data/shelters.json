@@ -1,0 +1,52 @@
+[
+  {
+    "id": "shelter-001",
+    "name": "I市防災センター",
+    "latitude": 35.7050,
+    "longitude": 140.0100,
+    "status": "green",
+    "updatedAt": "2026-08-07 14:20",
+    "confidence": { "level": "確定", "color": "green" },
+    "evacuees": { "total": 128, "elderly": 32, "infants": 8, "specialNeeds": 14 }
+  },
+  {
+    "id": "shelter-002",
+    "name": "I市立Alpha中学校",
+    "latitude": 35.6820,
+    "longitude": 139.9780,
+    "status": "yellow",
+    "updatedAt": "2026-08-07 14:05",
+    "confidence": { "level": "推定", "color": "yellow" },
+    "evacuees": { "total": 86, "elderly": 21, "infants": 6, "specialNeeds": 9 }
+  },
+  {
+    "id": "shelter-003",
+    "name": "I市立Beta小学校",
+    "latitude": 35.6740,
+    "longitude": 139.9900,
+    "status": "red",
+    "updatedAt": "2026-08-07 13:55",
+    "confidence": { "level": "確定", "color": "green" },
+    "evacuees": { "total": 174, "elderly": 48, "infants": 13, "specialNeeds": 22 }
+  },
+  {
+    "id": "shelter-004",
+    "name": "I市立Gamma小学校",
+    "latitude": 35.6760,
+    "longitude": 140.0250,
+    "status": "green",
+    "updatedAt": "2026-08-07 14:12",
+    "confidence": { "level": "確定", "color": "green" },
+    "evacuees": { "total": 63, "elderly": 11, "infants": 7, "specialNeeds": 5 }
+  },
+  {
+    "id": "shelter-005",
+    "name": "I市立Delta中学校",
+    "latitude": 35.7280,
+    "longitude": 140.0400,
+    "status": "gray",
+    "updatedAt": "2026-08-07 12:40",
+    "confidence": { "level": "未確認", "color": "gray" },
+    "evacuees": { "total": 41, "elderly": 16, "infants": 2, "specialNeeds": 8 }
+  }
+]

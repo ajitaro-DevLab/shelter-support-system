@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f7f5ef">
+  <title>イベント入力</title>
+  <link rel="stylesheet" href="css/event-center.css?v=4">
+</head>
+<body>
+  <header class="event-header">
+    <div>
+      <p class="eyebrow">避難所業務支援</p><h1>イベント入力</h1>
+      <p class="event-context-summary">
+        <span>対象避難所 <strong id="event-current-shelter">未設定</strong></span>
+        <span>最終更新者 <strong id="event-current-user">未設定</strong></span>
+      </p>
+    </div>
+    <div class="read-only-badge">V1.0通し試験対応</div>
+  </header>
+
+  <p id="event-context-guidance" class="event-context-guidance" role="alert" hidden>
+    <span id="event-context-message">対象避難所と利用者を設定してください。</span>
+    <a href="launcher.html">Launcherで設定する</a>
+  </p>
+
+  <main class="event-layout">
+    <section class="event-list-panel" aria-labelledby="event-list-title">
+      <div class="section-heading"><p class="eyebrow">EVENTS</p><h2 id="event-list-title">イベント一覧</h2></div>
+      <div id="event-list" class="event-list" aria-live="polite"><p>イベント定義を読み込んでいます...</p></div>
+      <p id="event-error" class="event-error" role="alert" hidden></p>
+    </section>
+
+    <aside id="event-detail" class="event-detail-panel" aria-labelledby="event-detail-title">
+      <div class="detail-heading">
+        <div><p class="eyebrow">EVENT DETAIL</p><h2 id="event-detail-title">イベントを選択</h2></div>
+        <span id="event-priority" class="priority-badge">--</span>
+      </div>
+      <p id="event-description" class="event-description">左のイベントを選ぶと、更新対象と影響画面を確認できます。</p>
+      <dl class="detail-list">
+        <div><dt>更新対象</dt><dd id="event-update-targets">--</dd></div>
+        <div><dt>影響画面</dt><dd id="event-impact-screens">--</dd></div>
+        <div><dt>対象画面</dt><dd id="event-target-screen">--</dd></div>
+        <div><dt>最終更新者</dt><dd id="event-last-updater">ログインユーザーIDから自動取得予定</dd></div>
+      </dl>
+      <div class="future-note"><strong>今回の実装範囲</strong><p>避難者来所、定時確認、物資受領、不具合、お知らせ更新に対応しています。緊急連絡は説明表示のみです。</p></div>
+      <div class="specialist-note"><strong>専門システムとの連携対象</strong><p>医療、配食、物流管理、詳細な物資配送は、このイベント入力の対象外です。</p></div>
+    </aside>
+  </main>
+
+  <section class="test-tools" aria-labelledby="test-tools-title">
+    <div><p class="eyebrow">DEVELOPMENT</p><h2 id="test-tools-title">通し試験用</h2><p>入力した時刻を次のイベントの発生時刻として使用します。空欄の場合は現在時刻です。</p><p class="stored-event-count">API取得履歴（直近最大3件） <strong id="stored-event-count">0</strong>件</p></div>
+    <label>試験時刻<input id="test-occurred-at" type="datetime-local"></label>
+    <button id="test-reload" type="button">APIデータを再読込</button>
+    <p>DB初期化は管理コマンドから実施します。</p>
+  </section>
+
+  <div id="arrival-modal" class="arrival-modal" role="dialog" aria-modal="true" aria-labelledby="arrival-modal-title" hidden>
+    <div class="arrival-panel">
+      <div class="arrival-heading">
+        <div><p class="eyebrow">EVACUEE ARRIVAL</p><h2 id="arrival-modal-title">避難者来所</h2><span data-event-context-shelter>未設定</span></div>
+        <button id="arrival-close" class="arrival-close" type="button" aria-label="閉じる">×</button>
+      </div>
+      <div class="arrival-counts">
+        <p>現在 <strong id="arrival-current-total">--</strong>名</p>
+        <p>更新後 <strong id="arrival-next-total">--</strong>名</p>
+      </div>
+      <p class="arrival-label">人数増減を選択</p>
+      <div class="delta-grid">
+        <button type="button" data-delta="1">＋1</button><button type="button" data-delta="5">＋5</button><button type="button" data-delta="10">＋10</button>
+        <button type="button" data-delta="-1">－1</button><button type="button" data-delta="-5">－5</button><button type="button" data-delta="-10">－10</button>
+      </div>
+      <label class="direct-delta">人数を直接入力<input id="arrival-direct-input" type="number" step="1" inputmode="numeric" placeholder="例：3 または -3"></label>
+      <p id="arrival-validation" class="arrival-validation" role="alert"></p>
+      <p class="arrival-updater">最終更新者 <strong data-event-context-updater>未設定</strong></p>
+      <div class="arrival-actions"><button id="arrival-cancel" type="button">キャンセル</button><button id="arrival-confirm" class="confirm-button" type="button">この内容で更新</button></div>
+    </div>
+  </div>
+
+  <div id="supply-modal" class="arrival-modal" role="dialog" aria-modal="true" aria-labelledby="supply-modal-title" hidden>
+    <div class="arrival-panel compact-form-panel">
+      <div class="arrival-heading">
+        <div><p class="eyebrow">SUPPLY RECEIVED</p><h2 id="supply-modal-title">物資受領</h2><span data-event-context-shelter>未設定</span></div>
+        <button id="supply-close" class="arrival-close" type="button" aria-label="閉じる">×</button>
+      </div>
+      <div class="event-form-grid">
+        <label>物資種別<select id="supply-item"><option value="">選択してください</option><option value="water">飲料水</option><option value="food">食料</option><option value="blanket">毛布</option><option value="hygiene">衛生用品</option><option value="portable_toilet">簡易トイレ</option></select></label>
+        <label>数量<input id="supply-quantity" type="number" min="1" step="1" inputmode="numeric" placeholder="1以上の整数"></label>
+        <label>単位<select id="supply-unit"><option value="">選択してください</option><option>ケース</option><option>箱</option><option>袋</option><option>個</option><option>枚</option><option>セット</option><option>台</option></select></label>
+      </div>
+      <p id="supply-validation" class="arrival-validation" role="alert"></p>
+      <p class="arrival-updater">最終更新者 <strong data-event-context-updater>未設定</strong></p>
+      <div class="arrival-actions"><button id="supply-cancel" type="button">キャンセル</button><button id="supply-confirm" class="confirm-button" type="button">受領を記録</button></div>
+    </div>
+  </div>
+
+  <div id="issue-modal" class="arrival-modal" role="dialog" aria-modal="true" aria-labelledby="issue-modal-title" hidden>
+    <div class="arrival-panel compact-form-panel">
+      <div class="arrival-heading">
+        <div><p class="eyebrow">FACILITY ISSUE</p><h2 id="issue-modal-title">避難所不具合</h2><span data-event-context-shelter>未設定</span></div>
+        <button id="issue-close" class="arrival-close" type="button" aria-label="閉じる">×</button>
+      </div>
+      <div class="event-form-grid">
+        <label>カテゴリ<select id="issue-category"><option value="">選択してください</option><option value="toilet">トイレ</option><option value="hygiene">ごみ・衛生</option><option value="power">停電</option><option value="water">断水</option><option value="air_conditioning">空調</option><option value="building">建物</option><option value="other">その他</option></select></label>
+        <label>状態<select id="issue-severity"><option value="">選択してください</option><option value="normal">問題なし</option><option value="caution">注意</option><option value="urgent">至急対応</option></select></label>
+      </div>
+      <div class="severity-guide" aria-label="状態の凡例"><span class="severity-none">● 問題なし</span><span class="severity-caution">● 注意</span><span class="severity-urgent">● 至急対応</span></div>
+      <p id="issue-validation" class="arrival-validation" role="alert"></p>
+      <p class="arrival-updater">最終更新者 <strong data-event-context-updater>未設定</strong></p>
+      <div class="arrival-actions"><button id="issue-cancel" type="button">キャンセル</button><button id="issue-confirm" class="confirm-button" type="button">不具合を記録</button></div>
+    </div>
+  </div>
+
+  <div id="notice-modal" class="arrival-modal" role="dialog" aria-modal="true" aria-labelledby="notice-modal-title" hidden>
+    <div class="arrival-panel compact-form-panel">
+      <div class="arrival-heading">
+        <div><p class="eyebrow">NOTICE UPDATE</p><h2 id="notice-modal-title">お知らせ更新</h2><span data-event-context-shelter>未設定</span></div>
+        <button id="notice-close" class="arrival-close" type="button" aria-label="閉じる">×</button>
+      </div>
+      <div class="event-form-grid notice-form-grid">
+        <label>タイトル<input id="notice-title" type="text" maxlength="30" placeholder="例：給水"></label>
+        <label>開始時刻<input id="notice-start-time" type="time"></label>
+        <label>場所<input id="notice-location" type="text" maxlength="40" placeholder="例：体育館東側"></label>
+        <label class="full-field">短い本文<textarea id="notice-message" maxlength="100" rows="3" placeholder="例：14:00より給水を開始します"></textarea></label>
+        <label>公開状態<select id="notice-public"><option value="">選択してください</option><option value="public">公開</option><option value="private">非公開</option></select></label>
+      </div>
+      <p class="form-note">Information Boardには「公開」の情報だけを表示します。</p>
+      <p id="notice-validation" class="arrival-validation" role="alert"></p>
+      <p class="arrival-updater">最終更新者 <strong data-event-context-updater>未設定</strong></p>
+      <div class="arrival-actions"><button id="notice-cancel" type="button">キャンセル</button><button id="notice-confirm" class="confirm-button" type="button">お知らせを記録</button></div>
+    </div>
+  </div>
+
+  <div id="routine-modal" class="arrival-modal" role="dialog" aria-modal="true" aria-labelledby="routine-modal-title" hidden>
+    <div class="arrival-panel routine-panel">
+      <div class="arrival-heading">
+        <div><p class="eyebrow">SCHEDULED CONFIRMATION</p><h2 id="routine-modal-title">避難者数定時確認</h2><span data-event-context-shelter>未設定</span></div>
+        <button id="routine-close" class="arrival-close" type="button" aria-label="閉じる">×</button>
+      </div>
+      <div class="routine-schedule" aria-label="定時確認時刻">
+        <p><span>今回の確認枠</span><strong id="routine-current-slot">--:--</strong></p>
+        <p><span>次回確認予定</span><strong id="routine-next-slot">--:--</strong></p>
+      </div>
+      <div class="routine-status">
+        <p><span>現在人数</span><strong><b id="routine-current-total">--</b>名</strong></p>
+        <p><span>前回正式確認人数</span><strong><b id="routine-previous-total">--</b><i id="routine-previous-unit">名</i></strong></p>
+        <p><span>前回確認時刻</span><strong id="routine-previous-time">未確認</strong></p>
+        <p><span>更新後の正式確認値</span><strong><b id="routine-next-total">--</b>名</strong></p>
+      </div>
+      <p class="arrival-label">確認方法を選択</p>
+      <button id="routine-unchanged" class="routine-unchanged" type="button">変更なし</button>
+      <div class="routine-delta-groups">
+        <div><p>増加</p><div class="delta-grid"><button type="button" data-routine-delta="1">＋1</button><button type="button" data-routine-delta="5">＋5</button><button type="button" data-routine-delta="10">＋10</button></div></div>
+        <div><p>減少</p><div class="delta-grid"><button type="button" data-routine-delta="-1">－1</button><button type="button" data-routine-delta="-5">－5</button><button type="button" data-routine-delta="-10">－10</button></div></div>
+      </div>
+      <label class="direct-delta">現在人数を直接訂正<input id="routine-direct-input" type="number" min="0" step="1" inputmode="numeric" placeholder="0以上の整数"></label>
+      <p id="routine-validation" class="arrival-validation" role="alert"></p>
+      <p class="arrival-updater">最終更新者 <strong data-event-context-updater>未設定</strong></p>
+      <div class="arrival-actions"><button id="routine-cancel" type="button">キャンセル</button><button id="routine-confirm" class="confirm-button" type="button">正式確認を記録</button></div>
+    </div>
+  </div>
+  <p id="event-success" class="event-success" role="status" hidden></p>
+  <script src="js/api-client.js?v=1"></script>
+  <script src="js/demo-context.js?v=1"></script>
+  <script src="js/confirmation-schedule.js?v=1"></script>
+  <script src="js/event-center.js?v=8"></script>
+</body>
+</html>

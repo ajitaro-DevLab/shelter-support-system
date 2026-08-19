@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f4f4ee">
+  <title>避難所業務支援 ランチャー</title>
+  <link rel="stylesheet" href="css/launcher.css">
+</head>
+<body>
+  <main class="launcher-shell">
+    <header class="launcher-header">
+      <p>災害時 共通インターフェース</p>
+      <h1>避難所業務支援</h1>
+      <span>開く画面を選択してください</span>
+    </header>
+
+    <section class="demo-settings" aria-labelledby="demo-settings-title">
+      <div class="settings-heading">
+        <div>
+          <p>この端末の設定</p>
+          <h2 id="demo-settings-title">対象避難所と利用者</h2>
+        </div>
+        <span id="demo-context-state" class="settings-state" role="status">設定を確認しています</span>
+      </div>
+
+      <form id="demo-context-form" class="settings-form">
+        <label for="shelter-select">
+          <span>対象避難所</span>
+          <select id="shelter-select" name="shelterId" disabled>
+            <option value="">避難所一覧を読み込んでいます</option>
+          </select>
+        </label>
+        <label for="user-select">
+          <span>利用者</span>
+          <select id="user-select" name="userId" disabled>
+            <option value="">利用者を選択してください</option>
+          </select>
+        </label>
+        <button id="demo-context-save" class="settings-save" type="submit" disabled>設定を保存</button>
+      </form>
+
+      <dl class="current-settings" aria-label="現在の端末設定">
+        <div><dt>現在の避難所</dt><dd id="current-shelter">未設定</dd></div>
+        <div><dt>現在の利用者</dt><dd id="current-user">未設定</dd></div>
+      </dl>
+      <p id="demo-context-guidance" class="settings-guidance">対象避難所と利用者を設定してください。</p>
+      <p id="demo-context-error" class="settings-error" role="alert" hidden></p>
+    </section>
+
+    <section class="launcher-grid" aria-label="システム画面">
+      <button class="launcher-card launcher-home" type="button" data-launch-url="index.html" data-window-name="shelter-home">
+        <span class="launcher-icon" aria-hidden="true">避</span>
+        <span><strong>避難所業務支援</strong><small>現場ホーム・避難所地図</small></span>
+        <span class="open-mark" aria-hidden="true">↗</span>
+      </button>
+      <button class="launcher-card launcher-board" type="button" data-launch-url="information.html" data-window-name="information-board">
+        <span class="launcher-icon" aria-hidden="true">掲</span>
+        <span><strong>Information Board</strong><small>避難者向け大型表示</small></span>
+        <span class="open-mark" aria-hidden="true">↗</span>
+      </button>
+      <button class="launcher-card launcher-hq" type="button" data-launch-url="hq-dashboard.html" data-window-name="hq-dashboard">
+        <span class="launcher-icon" aria-hidden="true">本</span>
+        <span><strong>HQ Dashboard</strong><small>本部向け状況一覧</small></span>
+        <span class="open-mark" aria-hidden="true">↗</span>
+      </button>
+      <button class="launcher-card launcher-event" type="button" data-launch-url="event-center.html" data-window-name="event-center">
+        <span class="launcher-icon" aria-hidden="true">記</span>
+        <span><strong>イベント入力</strong><small>出来事を選択</small></span>
+        <span class="open-mark" aria-hidden="true">↗</span>
+      </button>
+    </section>
+
+    <p class="launcher-note">各画面は独立したウィンドウで開きます</p>
+  </main>
+  <script src="js/api-client.js?v=1"></script>
+  <script src="js/demo-context.js?v=1"></script>
+  <script src="js/launcher.js?v=4"></script>
+</body>
+</html>

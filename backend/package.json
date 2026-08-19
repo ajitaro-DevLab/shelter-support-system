@@ -1,0 +1,21 @@
+{
+  "name": "shelter-support-backend",
+  "version": "1.0.0-demo",
+  "private": true,
+  "description": "V1 demonstration REST API for the shelter support prototype",
+  "type": "module",
+  "scripts": {
+    "start": "node src/db/bootstrap.js && node src/server.js",
+    "migrate-db": "node src/db/migrate.js",
+    "seed-db": "node src/db/seed.js",
+    "reset-db": "node src/db/reset.js",
+    "test": "node --test tests/health.test.js tests/shelters.test.js tests/confidence-display.test.js tests/freshness.test.js tests/shelter-detail.test.js tests/hq.test.js tests/visitor-change.test.js tests/confirmation.test.js tests/supply.test.js tests/issue.test.js tests/notice.test.js",
+    "test:integration": "node --test --test-concurrency=1 integration-tests/database.test.js integration-tests/rollback.test.js integration-tests/shelter-detail.test.js integration-tests/hq.test.js integration-tests/visitor-change.test.js integration-tests/confirmation.test.js integration-tests/supply.test.js integration-tests/issue.test.js integration-tests/notice.test.js integration-tests/v1-day-scenario.test.js"
+  },
+  "dependencies": {
+    "pg": "^8.0.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

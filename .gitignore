@@ -1,0 +1,12 @@
+# OS/editor files
+.DS_Store
+Thumbs.db
+*.swp
+
+# Local server logs
+*.log
+
+# Local environment values and secrets
+.env
+.env.*
+!.env.example

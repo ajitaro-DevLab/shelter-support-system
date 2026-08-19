@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f3f5f2">
+  <title>本部ダッシュボード</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIINfQ3ynh9PpYJbBMY=" crossorigin="">
+  <link rel="stylesheet" href="css/hq-dashboard.css?v=4">
+</head>
+<body>
+  <header class="dashboard-header">
+    <div>
+      <p class="eyebrow">避難所業務支援</p>
+      <h1>本部ダッシュボード</h1>
+      <p class="header-note">市内5避難所の最新状況</p>
+    </div>
+    <div class="dashboard-clock" aria-live="polite">
+      <time id="current-time">--:--</time>
+      <span id="current-date">----年--月--日</span>
+    </div>
+  </header>
+
+  <main class="dashboard-main">
+    <section class="summary-grid" aria-label="避難所集計">
+      <article class="summary-card summary-total"><span>総避難所</span><strong id="total-count">--</strong></article>
+      <article class="summary-card summary-normal"><span><i class="status-dot status-green"></i>正常</span><strong id="normal-count">--</strong></article>
+      <article class="summary-card summary-warning"><span><i class="status-dot status-yellow"></i>注意</span><strong id="warning-count">--</strong></article>
+      <article class="summary-card summary-support"><span><i class="status-dot status-red"></i>要支援</span><strong id="support-count">--</strong></article>
+      <article class="summary-card summary-stale"><span><i class="status-dot status-gray"></i>未更新</span><strong id="stale-count">--</strong></article>
+      <article class="summary-card summary-delay"><span>更新遅延</span><strong id="delay-count">--</strong></article>
+    </section>
+
+    <div id="dashboard-error" class="dashboard-error" role="alert" hidden></div>
+
+    <div class="dashboard-layout">
+      <section class="shelter-list-panel" aria-labelledby="shelter-list-title">
+        <div class="panel-heading">
+          <div><p class="eyebrow">OVERVIEW</p><h2 id="shelter-list-title">避難所一覧</h2></div>
+          <div class="freshness-legend" aria-label="情報鮮度の凡例">
+            <span><i class="freshness-dot freshness-green"></i>30分以内</span>
+            <span><i class="freshness-dot freshness-yellow"></i>2時間以内</span>
+            <span><i class="freshness-dot freshness-orange"></i>6時間以内</span>
+            <span><i class="freshness-dot freshness-black"></i>24時間超</span>
+          </div>
+        </div>
+        <div class="list-controls">
+          <label for="status-filter">表示対象</label>
+          <select id="status-filter">
+            <option value="all">すべて</option>
+            <option value="normal">正常のみ</option>
+            <option value="attention">注意以上</option>
+            <option value="support">要支援のみ</option>
+            <option value="stale">未更新のみ</option>
+            <option value="delayed">更新遅延のみ</option>
+          </select>
+          <p><strong id="visible-count">--</strong>件を表示</p>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th data-sort-column="name"><button type="button" data-sort-key="name">施設名<span class="sort-mark" aria-hidden="true"></span></button></th>
+              <th data-sort-column="status"><button type="button" data-sort-key="status">状態<span class="sort-mark" aria-hidden="true"></span></button></th>
+              <th data-sort-column="evacuees"><button type="button" data-sort-key="evacuees">現在避難者数<span class="sort-mark" aria-hidden="true"></span></button></th>
+              <th data-sort-column="officialConfirmedAt"><button type="button" data-sort-key="officialConfirmedAt">最終正式確認<span class="sort-mark" aria-hidden="true"></span></button></th>
+              <th data-sort-column="freshness" aria-sort="descending"><button type="button" data-sort-key="freshness">情報鮮度<span class="sort-mark" aria-hidden="true">▼</span></button></th>
+              <th data-sort-column="confidence"><button type="button" data-sort-key="confidence">信頼度<span class="sort-mark" aria-hidden="true"></span></button></th>
+            </tr></thead>
+            <tbody id="shelter-table-body"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <aside class="map-column">
+        <section class="map-panel" aria-labelledby="map-title">
+          <div class="panel-heading compact"><div><p class="eyebrow">LOCATION</p><h2 id="map-title">避難所地図</h2></div></div>
+          <div id="hq-map" aria-label="避難所5か所を表示する地図"></div>
+          <p id="map-error" class="map-error" role="status" hidden></p>
+        </section>
+
+        <section id="shelter-detail" class="detail-panel" aria-labelledby="detail-title">
+          <div class="detail-heading"><div><p class="eyebrow">SELECTED SHELTER</p><h2 id="detail-title">避難所を選択</h2></div><span id="detail-status" class="status-badge status-gray">未選択</span></div>
+          <dl class="detail-grid">
+            <div><dt>現在人数</dt><dd id="detail-evacuees">--</dd></div>
+            <div><dt>正式確認人数</dt><dd id="detail-official-total">--</dd></div>
+            <div><dt>最終正式確認時刻</dt><dd id="detail-official-at">--</dd></div>
+            <div><dt>定時確認状況</dt><dd id="detail-confirmation-status">--</dd></div>
+            <div><dt>主要物資</dt><dd id="detail-supplies">--</dd></div>
+            <div><dt>最終更新時刻</dt><dd id="detail-updated">--</dd></div>
+            <div><dt>信頼度</dt><dd id="detail-confidence">--</dd></div>
+            <div><dt>最終更新者</dt><dd id="detail-updater">--</dd></div>
+          </dl>
+          <div class="operational-detail"><h3>最新受領情報</h3><ul id="detail-supply-receipts"><li>記録なし</li></ul></div>
+          <div class="operational-detail"><h3>避難所不具合</h3><ul id="detail-facility-issues"><li>記録なし</li></ul></div>
+          <div class="contact-reason"><h3>連絡推奨理由</h3><ul id="detail-reasons"><li>--</li></ul></div>
+          <div class="history-section"><h3>直近の更新履歴</h3><ol id="detail-history"><li>--</li></ol></div>
+        </section>
+      </aside>
+    </div>
+  </main>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="js/api-client.js?v=1"></script>
+  <script src="js/hq-dashboard.js?v=8"></script>
+</body>
+</html>

@@ -1,0 +1,42 @@
+[
+  {
+    "shelterId": "shelter-001",
+    "water": { "label": "水 82%", "supplyRate": 82, "hoursRemaining": 36, "status": "green" },
+    "food": { "label": "食料 76%", "supplyRate": 76, "hoursRemaining": 30, "status": "green" },
+    "blankets": { "label": "毛布 64%", "supplyRate": 64, "hoursRemaining": 48, "status": "yellow" },
+    "hygiene": { "label": "衛生用品 71%", "supplyRate": 71, "hoursRemaining": 32, "status": "green" },
+    "portableToilets": { "label": "簡易トイレ 58%", "supplyRate": 58, "hoursRemaining": 20, "status": "yellow" }
+  },
+  {
+    "shelterId": "shelter-002",
+    "water": { "label": "水 55%", "supplyRate": 55, "hoursRemaining": 18, "status": "yellow" },
+    "food": { "label": "食料 47%", "supplyRate": 47, "hoursRemaining": 14, "status": "yellow" },
+    "blankets": { "label": "毛布 72%", "supplyRate": 72, "hoursRemaining": 40, "status": "green" },
+    "hygiene": { "label": "衛生用品 51%", "supplyRate": 51, "hoursRemaining": 17, "status": "yellow" },
+    "portableToilets": { "label": "簡易トイレ 44%", "supplyRate": 44, "hoursRemaining": 12, "status": "red" }
+  },
+  {
+    "shelterId": "shelter-003",
+    "water": { "label": "水 28%", "supplyRate": 28, "hoursRemaining": 7, "status": "red" },
+    "food": { "label": "食料 34%", "supplyRate": 34, "hoursRemaining": 9, "status": "red" },
+    "blankets": { "label": "毛布 45%", "supplyRate": 45, "hoursRemaining": 16, "status": "yellow" },
+    "hygiene": { "label": "衛生用品 31%", "supplyRate": 31, "hoursRemaining": 8, "status": "red" },
+    "portableToilets": { "label": "簡易トイレ 22%", "supplyRate": 22, "hoursRemaining": 6, "status": "red" }
+  },
+  {
+    "shelterId": "shelter-004",
+    "water": { "label": "水 88%", "supplyRate": 88, "hoursRemaining": 42, "status": "green" },
+    "food": { "label": "食料 81%", "supplyRate": 81, "hoursRemaining": 38, "status": "green" },
+    "blankets": { "label": "毛布 92%", "supplyRate": 92, "hoursRemaining": 60, "status": "green" },
+    "hygiene": { "label": "衛生用品 79%", "supplyRate": 79, "hoursRemaining": 35, "status": "green" },
+    "portableToilets": { "label": "簡易トイレ 74%", "supplyRate": 74, "hoursRemaining": 31, "status": "green" }
+  },
+  {
+    "shelterId": "shelter-005",
+    "water": { "label": "水 未確認", "supplyRate": null, "hoursRemaining": null, "status": "gray" },
+    "food": { "label": "食料 未確認", "supplyRate": null, "hoursRemaining": null, "status": "gray" },
+    "blankets": { "label": "毛布 未確認", "supplyRate": null, "hoursRemaining": null, "status": "gray" },
+    "hygiene": { "label": "衛生用品 未確認", "supplyRate": null, "hoursRemaining": null, "status": "gray" },
+    "portableToilets": { "label": "簡易トイレ 未確認", "supplyRate": null, "hoursRemaining": null, "status": "gray" }
+  }
+]

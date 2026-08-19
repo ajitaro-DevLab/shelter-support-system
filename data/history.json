@@ -1,0 +1,52 @@
+[
+  {
+    "shelterId": "shelter-001",
+    "lastUpdatedBy": "佐藤",
+    "contactReasons": ["定期確認"],
+    "history": [
+      { "time": "14:20", "user": "佐藤", "action": "水の在庫を更新" },
+      { "time": "13:48", "user": "山田", "action": "避難者数を更新" },
+      { "time": "13:10", "user": "田中", "action": "衛生状態を更新" }
+    ]
+  },
+  {
+    "shelterId": "shelter-002",
+    "lastUpdatedBy": "山田",
+    "contactReasons": ["情報更新なし"],
+    "history": [
+      { "time": "14:05", "user": "山田", "action": "避難者数を更新" },
+      { "time": "13:35", "user": "佐藤", "action": "食料の在庫を更新" },
+      { "time": "12:55", "user": "鈴木", "action": "簡易トイレの状態を更新" }
+    ]
+  },
+  {
+    "shelterId": "shelter-003",
+    "lastUpdatedBy": "田中",
+    "contactReasons": ["飲料水不足", "医療要支援", "避難者急増"],
+    "history": [
+      { "time": "13:55", "user": "田中", "action": "医療要支援を更新" },
+      { "time": "13:30", "user": "山田", "action": "飲料水の不足を報告" },
+      { "time": "12:50", "user": "佐藤", "action": "避難者数を更新" }
+    ]
+  },
+  {
+    "shelterId": "shelter-004",
+    "lastUpdatedBy": "鈴木",
+    "contactReasons": ["定期確認"],
+    "history": [
+      { "time": "14:12", "user": "鈴木", "action": "物資状況を更新" },
+      { "time": "13:40", "user": "田中", "action": "避難者数を更新" },
+      { "time": "13:05", "user": "佐藤", "action": "施設状態を更新" }
+    ]
+  },
+  {
+    "shelterId": "shelter-005",
+    "lastUpdatedBy": "高橋",
+    "contactReasons": ["情報更新なし"],
+    "history": [
+      { "time": "12:40", "user": "高橋", "action": "避難所開設を報告" },
+      { "time": "12:15", "user": "佐藤", "action": "初回状況を確認" },
+      { "time": "11:50", "user": "山田", "action": "施設連絡先を確認" }
+    ]
+  }
+]

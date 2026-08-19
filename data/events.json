@@ -1,0 +1,79 @@
+[
+  {
+    "id": "evacuee-arrival",
+    "name": "避難者来所",
+    "symbol": "人",
+    "summary": "来所による人数変化を記録",
+    "description": "避難者の来所を起点に、避難者数・更新時刻・最終更新者・更新履歴を反映するイベントです。",
+    "targetScreen": "Event Center（避難者来所入力）",
+    "updateTargets": ["shelters（避難者数・更新時刻・最終更新者）", "history（更新履歴）"],
+    "impactScreens": ["避難所業務支援", "HQ Dashboard"],
+    "dataTargets": ["shelters", "history"],
+    "priority": "通常",
+    "lastUpdaterPolicy": "ログインユーザーIDから自動取得予定"
+  },
+  {
+    "id": "supply-received",
+    "name": "物資受領",
+    "symbol": "箱",
+    "summary": "主要物資の受領を記録",
+    "description": "5種類の主要物資について、受領した数量と単位をそのまま記録します。荷姿換算は行いません。",
+    "targetScreen": "Event Center（物資受領入力）",
+    "updateTargets": ["最新受領情報", "更新時刻", "最終更新者", "更新履歴"],
+    "impactScreens": ["避難所業務支援", "HQ Dashboard"],
+    "dataTargets": ["supplies", "history"],
+    "priority": "通常",
+    "lastUpdaterPolicy": "ログインユーザーIDから自動取得予定"
+  },
+  {
+    "id": "notice-update",
+    "name": "お知らせ更新",
+    "symbol": "掲",
+    "summary": "生活支援情報の候補を更新",
+    "description": "避難者向けのお知らせ候補を更新するイベントです。Information Boardには確定した生活支援情報のみ反映する方針です。",
+    "targetScreen": "Event Center（お知らせ更新入力）",
+    "updateTargets": ["確定済み生活支援情報", "更新履歴"],
+    "impactScreens": ["Information Board"],
+    "dataTargets": ["notices", "history"],
+    "priority": "通常",
+    "lastUpdaterPolicy": "ログインユーザーIDから自動取得予定"
+  },
+  {
+    "id": "facility-issue",
+    "name": "避難所不具合",
+    "symbol": "!",
+    "summary": "設備や利用環境の問題を記録",
+    "description": "避難所設備の故障や利用上の問題を記録するイベントです。",
+    "targetScreen": "Event Center（避難所不具合入力）",
+    "updateTargets": ["不具合カテゴリ", "状態", "更新時刻", "最終更新者", "更新履歴"],
+    "impactScreens": ["避難所業務支援", "HQ Dashboard"],
+    "dataTargets": ["issues", "history"],
+    "priority": "高",
+    "lastUpdaterPolicy": "ログインユーザーIDから自動取得予定"
+  },
+  {
+    "id": "emergency-contact",
+    "name": "緊急連絡",
+    "symbol": "緊",
+    "summary": "本部確認が必要な事象を記録",
+    "description": "本部へ速やかな確認を求める出来事を記録するイベントです。送信処理はまだ行いません。",
+    "targetScreen": "将来の緊急連絡画面",
+    "updateTargets": ["緊急連絡状態", "連絡推奨理由"],
+    "impactScreens": ["避難所業務支援", "HQ Dashboard"],
+    "priority": "緊急",
+    "lastUpdaterPolicy": "ログインユーザーIDから自動取得予定"
+  },
+  {
+    "id": "shelter-routine-update",
+    "name": "避難者数定時確認",
+    "symbol": "定時",
+    "summary": "09時・13時・18時の正式確認",
+    "description": "点呼を前提とせず、変更なし・増減・実数訂正のいずれかで避難者数を正式確認するイベントです。",
+    "targetScreen": "Event Center（避難者数定時確認）",
+    "updateTargets": ["現在避難者数", "正式確認人数", "正式確認時刻", "確認枠", "最終更新者", "更新履歴"],
+    "impactScreens": ["避難所業務支援", "HQ Dashboard"],
+    "dataTargets": ["shelters", "history"],
+    "priority": "通常",
+    "lastUpdaterPolicy": "ログインユーザーIDから自動取得予定"
+  }
+]

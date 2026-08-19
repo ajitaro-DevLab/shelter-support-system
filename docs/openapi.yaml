@@ -1,0 +1,1033 @@
+openapi: 3.0.3
+info:
+  title: 避難所業務支援Webアプリ V1実証版 API
+  version: 1.0.0-demo
+servers:
+  - url: /api
+paths:
+  /health:
+    get:
+      summary: APIの起動状態を確認する
+      operationId: getHealth
+      responses:
+        '200':
+          description: APIは要求を処理できる
+          headers:
+            X-Request-Id:
+              description: 要求追跡用ID
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+        '503':
+          description: PostgreSQLへ接続できずAPIを利用できない
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: API内部の予期しない障害
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /shelters:
+    get:
+      summary: 有効な避難所一覧を取得する
+      operationId: listShelters
+      responses:
+        '200':
+          description: 有効な避難所一覧
+          headers:
+            X-Request-Id:
+              description: 要求追跡用ID
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ShelterSummary'
+        '500':
+          description: API内部の予期しない障害
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: PostgreSQLへ接続できずAPIを利用できない
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /shelters/{id}:
+    get:
+      summary: HomeとHQ詳細に必要な対象避難所情報を取得する
+      operationId: getShelterDetail
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 基本情報、人数、正式確認、最新物資、最新不具合、直近3履歴
+          headers:
+            X-Request-Id:
+              description: リクエスト追跡用ID
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShelterDetail'
+        '404':
+          description: 指定された避難所が存在しない
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: API内部の予期しない障害
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: PostgreSQLへ接続できずAPIを利用できない
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /hq/shelters:
+    get:
+      summary: 本部向けの全避難所状況を取得する
+      description: confidenceは現在確認枠、freshnessは最終正式確認時刻を基準に算出する。
+      operationId: listHqShelters
+      responses:
+        '200':
+          description: 本部一覧表示に必要な全避難所の現在状況
+          headers:
+            X-Request-Id:
+              description: リクエスト追跡用ID
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/HqShelter'
+        '500':
+          description: API内部の予期しない障害
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: PostgreSQLへ接続できずAPIを利用できない
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /shelters/{id}/confirmations:
+    post:
+      summary: 避難者数の正式確認を記録する
+      operationId: recordConfirmation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfirmationRequest'
+      responses:
+        '201':
+          description: 正式確認、イベント履歴、避難所状態を同一トランザクションで更新した
+          headers:
+            X-Request-Id:
+              description: 要求追跡用ID
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfirmationResponse'
+        '400':
+          description: 入力、確認枠、または確認方法と人数の組み合わせが不正
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: 指定された避難所が存在しない
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: API内部の予期しない障害
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: PostgreSQLへ接続できずAPIを利用できない
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /shelters/{id}/supplies:
+    post:
+      summary: 物資受領を記録する
+      operationId: recordSupplyReceipt
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SupplyRequest'
+      responses:
+        '201':
+          description: 物資受領とイベント履歴を記録した。在庫残量計算は行わない
+          headers:
+            X-Request-Id:
+              description: 要求追跡用ID
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupplyResponse'
+        '400':
+          description: 物資種別、数量、単位、日時または更新主体が不正
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: 指定された避難所が存在しない
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: API内部の予期しない障害
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: PostgreSQLへ接続できずAPIを利用できない
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /shelters/{id}/issues:
+    post:
+      summary: 避難所内の課題状態を記録する
+      description: 本部向けの内部情報として記録し、Information Boardには公開しない。
+      operationId: recordIssue
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IssueRequest'
+      responses:
+        '201':
+          description: 課題、イベント履歴、避難所状態を同一トランザクションで更新した
+          headers:
+            X-Request-Id:
+              description: リクエスト追跡用ID
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IssueResponse'
+        '400':
+          description: カテゴリ、深刻度、日時または最終更新者が不正
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: 指定された避難所が存在しない
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: API内部の予期しない障害
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: PostgreSQLへ接続できずAPIを利用できない
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /shelters/{id}/notices:
+    get:
+      summary: 対象避難所のお知らせを取得する
+      operationId: listNotices
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: public
+          in: query
+          required: false
+          description: trueの場合はInformation Board向けの公開情報だけを返す
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: 発生日時の新しい順のお知らせ一覧
+          headers:
+            X-Request-Id:
+              description: リクエスト追跡用ID
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Notice'
+        '404':
+          description: 指定された避難所が存在しない
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: API内部の予期しない障害
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: PostgreSQLへ接続できずAPIを利用できない
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    post:
+      summary: 対象避難所のお知らせを記録する
+      operationId: recordNotice
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NoticeRequest'
+      responses:
+        '201':
+          description: お知らせ、イベント履歴、避難所の更新情報を同一トランザクションで更新した
+          headers:
+            X-Request-Id:
+              description: リクエスト追跡用ID
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NoticeResponse'
+        '400':
+          description: タイトル、開始時刻、場所、本文、公開状態、日時または最終更新者が不正
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: 指定された避難所が存在しない
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: API内部の予期しない障害
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: PostgreSQLへ接続できずAPIを利用できない
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /shelters/{id}/events/visitor-change:
+    post:
+      summary: 避難者の来所・退出による人数増減を記録する
+      operationId: recordVisitorChange
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VisitorChangeRequest'
+      responses:
+        '201':
+          description: イベント履歴と避難所の現在人数を同一トランザクションで更新した
+          headers:
+            X-Request-Id:
+              description: 要求追跡用ID
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VisitorChangeResponse'
+        '400':
+          description: 入力不正または更新後人数が0未満
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: 指定された避難所が存在しない
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: API内部の予期しない障害
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: PostgreSQLへ接続できずAPIを利用できない
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    HealthResponse:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          enum:
+            - ok
+    ShelterSummary:
+      type: object
+      required:
+        - id
+        - name
+        - status
+        - currentCount
+        - updatedAt
+      properties:
+        id:
+          type: string
+          example: shelter-002
+        name:
+          type: string
+          example: I市立Alpha中学校
+        status:
+          type: string
+          enum: [green, yellow, red, gray]
+        currentCount:
+          type: integer
+          minimum: 0
+        updatedAt:
+          type: string
+          format: date-time
+    HqShelter:
+      type: object
+      required:
+        - shelterId
+        - name
+        - status
+        - currentCount
+        - confirmedCount
+        - confirmedAt
+        - freshness
+        - confidence
+        - updatedAt
+        - updatedBy
+      properties:
+        shelterId:
+          type: string
+          example: shelter-002
+        name:
+          type: string
+          example: I市立Alpha中学校
+        status:
+          type: string
+          enum: [green, yellow, red, gray]
+        currentCount:
+          type: integer
+          minimum: 0
+        confirmedCount:
+          type: integer
+          minimum: 0
+          nullable: true
+        confirmedAt:
+          type: string
+          format: date-time
+          nullable: true
+        freshness:
+          $ref: '#/components/schemas/Freshness'
+        confidence:
+          type: string
+          enum: [confirmed, estimated, unconfirmed]
+          description: 現在確認枠が未確認の場合はDB値を変更せずunconfirmedを返す表示値
+        updatedAt:
+          type: string
+          format: date-time
+        updatedBy:
+          type: string
+    Freshness:
+      type: object
+      required: [level, elapsedMinutes, display, delayed]
+      properties:
+        level:
+          type: string
+          enum: [green, yellow, orange, black]
+          description: 30分以内、2時間以内、6時間以内、それより古いまたは未確認の4段階
+        elapsedMinutes:
+          type: integer
+          minimum: 0
+          nullable: true
+        display:
+          type: string
+          example: 2時間前
+        delayed:
+          type: boolean
+          description: 最終正式確認から30分を超過、または正式確認なしの場合true
+    ShelterDetail:
+      type: object
+      required:
+        - id
+        - name
+        - latitude
+        - longitude
+        - status
+        - currentCount
+        - confirmedCount
+        - confirmedAt
+        - confirmationSlot
+        - confidence
+        - updatedAt
+        - updatedBy
+        - latestSupply
+        - latestIssue
+        - history
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        latitude:
+          type: number
+          format: double
+          nullable: true
+        longitude:
+          type: number
+          format: double
+          nullable: true
+        status:
+          type: string
+          enum: [green, yellow, red, gray]
+        currentCount:
+          type: integer
+          minimum: 0
+        confirmedCount:
+          type: integer
+          minimum: 0
+          nullable: true
+        confirmedAt:
+          type: string
+          format: date-time
+          nullable: true
+        confirmationSlot:
+          type: string
+          enum: ['09:00', '13:00', '18:00']
+          nullable: true
+        confidence:
+          type: string
+          enum: [confirmed, estimated, unconfirmed]
+          description: 現在確認枠が未確認の場合はDB値を変更せずunconfirmedを返す表示値
+        updatedAt:
+          type: string
+          format: date-time
+        updatedBy:
+          type: string
+        latestSupply:
+          allOf:
+            - $ref: '#/components/schemas/LatestSupply'
+          nullable: true
+        latestIssue:
+          allOf:
+            - $ref: '#/components/schemas/LatestIssue'
+          nullable: true
+        history:
+          type: array
+          maxItems: 3
+          items:
+            $ref: '#/components/schemas/ShelterHistoryEvent'
+    LatestSupply:
+      type: object
+      required: [supplyId, supplyType, quantity, unit, occurredAt, updatedBy]
+      properties:
+        supplyId:
+          type: string
+          pattern: '^\d+$'
+        supplyType:
+          type: string
+          enum: [water, food, blanket, hygiene, portable_toilet]
+        quantity:
+          type: integer
+          minimum: 1
+        unit:
+          type: string
+        occurredAt:
+          type: string
+          format: date-time
+        updatedBy:
+          type: string
+    LatestIssue:
+      type: object
+      required: [issueId, category, severity, occurredAt, updatedBy]
+      properties:
+        issueId:
+          type: string
+          pattern: '^\d+$'
+        category:
+          type: string
+          enum: [toilet, hygiene, power, water, air_conditioning, building, other]
+        severity:
+          type: string
+          enum: [normal, caution, urgent]
+        occurredAt:
+          type: string
+          format: date-time
+        updatedBy:
+          type: string
+    ShelterHistoryEvent:
+      type: object
+      required: [eventId, eventType, occurredAt, updatedBy, payload, status]
+      properties:
+        eventId:
+          type: string
+        eventType:
+          type: string
+          enum: [visitor_change, confirmation, supply_received, issue_update, notice_update]
+        occurredAt:
+          type: string
+          format: date-time
+        updatedBy:
+          type: string
+        payload:
+          type: object
+          additionalProperties: true
+        status:
+          type: string
+    VisitorChangeRequest:
+      type: object
+      required: [delta, occurredAt, updatedBy]
+      properties:
+        delta:
+          type: integer
+          not:
+            enum: [0]
+          example: 10
+        occurredAt:
+          type: string
+          format: date-time
+        updatedBy:
+          type: string
+          minLength: 1
+          example: demo-user-01
+    VisitorChangeResponse:
+      type: object
+      required:
+        - eventId
+        - eventType
+        - shelterId
+        - delta
+        - currentCount
+        - confidence
+        - updatedAt
+        - updatedBy
+        - status
+      properties:
+        eventId:
+          type: string
+          format: uuid
+        eventType:
+          type: string
+          enum: [visitor_change]
+        shelterId:
+          type: string
+        delta:
+          type: integer
+        currentCount:
+          type: integer
+          minimum: 0
+        confidence:
+          type: string
+          enum: [estimated]
+        updatedAt:
+          type: string
+          format: date-time
+        updatedBy:
+          type: string
+        status:
+          type: string
+          enum: [accepted]
+    ConfirmationRequest:
+      type: object
+      required: [mode, confirmedCount, confirmationSlot, occurredAt, updatedBy]
+      properties:
+        mode:
+          type: string
+          enum: [unchanged, delta, correction]
+          description: unchangedは現在人数と同値、deltaは現在人数から±1・±5・±10、correctionは実数訂正
+        confirmedCount:
+          type: integer
+          minimum: 0
+        confirmationSlot:
+          type: string
+          enum: ['09:00', '13:00', '18:00']
+        occurredAt:
+          type: string
+          format: date-time
+        updatedBy:
+          type: string
+          minLength: 1
+          example: demo-user-01
+    ConfirmationResponse:
+      type: object
+      required:
+        - confirmationId
+        - eventId
+        - eventType
+        - shelterId
+        - mode
+        - currentCount
+        - confirmedCount
+        - confirmedAt
+        - confirmationSlot
+        - confidence
+        - updatedAt
+        - updatedBy
+        - status
+      properties:
+        confirmationId:
+          type: string
+          pattern: '^\d+$'
+        eventId:
+          type: string
+          format: uuid
+        eventType:
+          type: string
+          enum: [confirmation]
+        shelterId:
+          type: string
+        mode:
+          type: string
+          enum: [unchanged, delta, correction]
+        currentCount:
+          type: integer
+          minimum: 0
+        confirmedCount:
+          type: integer
+          minimum: 0
+        confirmedAt:
+          type: string
+          format: date-time
+        confirmationSlot:
+          type: string
+          enum: ['09:00', '13:00', '18:00']
+        confidence:
+          type: string
+          enum: [confirmed]
+        updatedAt:
+          type: string
+          format: date-time
+        updatedBy:
+          type: string
+        status:
+          type: string
+          enum: [accepted]
+    SupplyRequest:
+      type: object
+      required: [supplyType, quantity, unit, occurredAt, updatedBy]
+      properties:
+        supplyType:
+          type: string
+          enum: [water, food, blanket, hygiene, portable_toilet]
+        quantity:
+          type: integer
+          minimum: 1
+        unit:
+          type: string
+          enum: [ケース, 箱, 袋, 個, 枚, セット, 台]
+        occurredAt:
+          type: string
+          format: date-time
+        updatedBy:
+          type: string
+          minLength: 1
+          example: demo-user-01
+    SupplyResponse:
+      type: object
+      required:
+        - supplyId
+        - eventId
+        - eventType
+        - shelterId
+        - supplyType
+        - quantity
+        - unit
+        - occurredAt
+        - updatedAt
+        - updatedBy
+        - status
+      properties:
+        supplyId:
+          type: string
+          pattern: '^\d+$'
+        eventId:
+          type: string
+          format: uuid
+        eventType:
+          type: string
+          enum: [supply_received]
+        shelterId:
+          type: string
+        supplyType:
+          type: string
+          enum: [water, food, blanket, hygiene, portable_toilet]
+        quantity:
+          type: integer
+          minimum: 1
+        unit:
+          type: string
+          enum: [ケース, 箱, 袋, 個, 枚, セット, 台]
+        occurredAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        updatedBy:
+          type: string
+        status:
+          type: string
+          enum: [accepted]
+    IssueRequest:
+      type: object
+      required: [category, severity, occurredAt, updatedBy]
+      properties:
+        category:
+          type: string
+          enum: [toilet, hygiene, power, water, air_conditioning, building, other]
+        severity:
+          type: string
+          enum: [normal, caution, urgent]
+        occurredAt:
+          type: string
+          format: date-time
+        updatedBy:
+          type: string
+          minLength: 1
+          example: demo-user-01
+    IssueResponse:
+      type: object
+      required:
+        - issueId
+        - eventId
+        - eventType
+        - shelterId
+        - category
+        - severity
+        - shelterStatus
+        - occurredAt
+        - updatedAt
+        - updatedBy
+        - status
+      properties:
+        issueId:
+          type: string
+          pattern: '^\d+$'
+        eventId:
+          type: string
+          format: uuid
+        eventType:
+          type: string
+          enum: [issue_update]
+        shelterId:
+          type: string
+        category:
+          type: string
+          enum: [toilet, hygiene, power, water, air_conditioning, building, other]
+        severity:
+          type: string
+          enum: [normal, caution, urgent]
+        shelterStatus:
+          type: string
+          enum: [green, yellow, red, gray]
+        occurredAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        updatedBy:
+          type: string
+        status:
+          type: string
+          enum: [accepted]
+    NoticeRequest:
+      type: object
+      required: [title, startTime, location, body, isPublic, occurredAt, updatedBy]
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 30
+        startTime:
+          type: string
+          pattern: '^([01]\d|2[0-3]):[0-5]\d$'
+          example: '14:00'
+        location:
+          type: string
+          minLength: 1
+          maxLength: 40
+        body:
+          type: string
+          minLength: 1
+          maxLength: 100
+        isPublic:
+          type: boolean
+        occurredAt:
+          type: string
+          format: date-time
+        updatedBy:
+          type: string
+          minLength: 1
+          example: demo-user-01
+    Notice:
+      type: object
+      required:
+        - noticeId
+        - shelterId
+        - title
+        - startTime
+        - location
+        - body
+        - isPublic
+        - occurredAt
+        - updatedBy
+        - createdAt
+      properties:
+        noticeId:
+          type: string
+          pattern: '^\d+$'
+        shelterId:
+          type: string
+        title:
+          type: string
+          maxLength: 30
+        startTime:
+          type: string
+          pattern: '^([01]\d|2[0-3]):[0-5]\d$'
+        location:
+          type: string
+          maxLength: 40
+        body:
+          type: string
+          maxLength: 100
+        isPublic:
+          type: boolean
+        occurredAt:
+          type: string
+          format: date-time
+        updatedBy:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+    NoticeResponse:
+      allOf:
+        - $ref: '#/components/schemas/NoticeRequest'
+        - type: object
+          required: [noticeId, eventId, eventType, shelterId, updatedAt, status]
+          properties:
+            noticeId:
+              type: string
+              pattern: '^\d+$'
+            eventId:
+              type: string
+              format: uuid
+            eventType:
+              type: string
+              enum: [notice_update]
+            shelterId:
+              type: string
+            updatedAt:
+              type: string
+              format: date-time
+            status:
+              type: string
+              enum: [accepted]
+    ErrorResponse:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code:
+              type: string
+            message:
+              type: string
