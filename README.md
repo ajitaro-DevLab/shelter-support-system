@@ -64,8 +64,6 @@ V1実証版では、避難所の端末（Home / Event Center）から入力し�
 | Information Board | `information.html` | 公開されたお知らせだけを避難者向けに表示 |
 | HQ Dashboard | `hq-dashboard.html` | 複数避難所の状況を一覧・地図・詳細で確認 |
 
-`docs/screenshots/` には旧UIの一部キャプチャが残っていますが、いずれも現在の画面構成やイベント内容と一致しないため、本READMEでは参照していません。実在地名が写っていたキャプチャは削除済みです。
-
 ## システム構成
 
 ```mermaid
@@ -199,8 +197,7 @@ APIの詳細仕様は [`docs/openapi.yaml`](docs/openapi.yaml)（OpenAPI 3.0.3�
 │  ├─ migrations/            スキーマ定義
 │  └─ seed/                  5避難所分のデモデータ投入用SQL
 ├─ docs/
-│  ├─ openapi.yaml           API仕様（OpenAPI 3.0.3）
-│  └─ screenshots/           旧UIのキャプチャ（現行画面とは不一致。上記「画面構成」参照）
+│  └─ openapi.yaml           API仕様（OpenAPI 3.0.3）
 ├─ tests/                    Frontend側のテスト（Node.jsから各画面のJSを検証）
 ├─ frontend/ , backend/Dockerfile , docker-compose.yml   コンテナ構成
 └─ .env.example              環境変数のサンプル
